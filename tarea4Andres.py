@@ -8,9 +8,12 @@
 # Importa la libreria numpay
 import numpy as np
 
+# Constante
+numVarsRegresion = 3;
+
 # Leer un archivo
-# @Param: nombre del archivo
-# @Return: matriz de los datos leidos
+# @param: nombre del archivo
+# @return: matriz de los datos leidos
 def leer(nombreArchivo):
 	infile = open(nombreArchivo,'r')
 	text = infile.readlines()
@@ -45,11 +48,48 @@ def regresion(matrizDatos, vectorDatos):
 	return m
 
 
+# Halla la covarianza entre dos vectores
+# @param: Vector1
+# @param: Vector2
+# @return: covarianza
+def calcularCovarianza(vector1, vector2):
+	m1 = np.mean(vector1)
+	m2 = np.mean(vector2)
+	suma = 0;
+	for i in range(len(vector1)):
+		suma = suma + (vector1.item(i,0)-m1)*(vector2.item(i,0)-m2)
+	return suma/(len(vector1)-1)
 
+# Halla la matriz de covarianza
+# Observacion: El requerimiento solicita "verificar si los valores obtenidos para la gravedad son independientes
+#	de los valores iniciales de las velocidades iniciales". No se incluye theta en el analisis
+# @param: Matriz de datos: [gravedad, vox, voy]
+def calcularMatrizCovarianza(matrizDatos):
+	v1 = matrizDatos[0,:].copy()
+	v2 = matrizDatos[1,:].copy()
+	v3 = matrizDatos[2,:].copy()
+	v1 = np.transpose(v1)
+	v2 = np.transpose(v2)
+	v3 = np.transpose(v3)
+	o11 = calcularCovarianza(v1,v1)
+	o12 = calcularCovarianza(v1,v2)
+	o13 = calcularCovarianza(v1,v3)
+	o22 = calcularCovarianza(v2,v2)
+	o23 = calcularCovarianza(v2,v3)
+	o33 = calcularCovarianza(v3,v3)
+	o1 = [[o11,o12,o13]]
+	print "o1", o1
+	o2 = [[o12,o22,o23]]
+	o3 = [[o13,o23,o33]]
+	matrizCov = np.matrix(o1)
+	matrizCov = np.concatenate((matrizCov,o2))
+	matrizCov = np.concatenate((matrizCov,o3))
+	return matrizCov
 
 matriz1 = leer("experimentID_0_theta_0.0.txt")
 a = np.matrix('1 2;3 4; 5 6')
-print a
 v = np.matrix('3;2;3')
 regresion(a,v)
-#print matriz1
+print calcularCovarianza(v,v)
+print calcularMatrizCovarianza(a)
+print np.size(a)
