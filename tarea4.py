@@ -39,12 +39,50 @@ def matrizG(matrix):
 		i=i+3
 	return G
 
+
 # Hace la regresion
-# @param: matriz con los datos
-# @return: vector con [g, voy, vox]
+# @param: matriz con los datos: [1, t, t^2/2]
+# @param: vector de datos y o x
+# @return: vector con [m1 m2 m3]
+def regresion(matrizDatos, vectorDatos):
+	g = matrizDatos
+	gt = np.transpose(g)
+	x = gt*g
+	xinv = np.linalg.inv(x)
+	y = xinv*gt
+	m = y*vectorDatos
+	return m
 
 
-
+#Lee los datos
 matriz1 = leer("experimentID_0_theta_0.0.txt")
-matriz2 = matrizG(matriz1)
-print matriz2
+# Vector de posiciones en x
+x = [matriz1[1]]
+i = 4
+dx = np.matrix(x)
+while i < (len(matriz1))-3:
+	x = [[matriz1[i]]]
+	dx = np.concatenate((dx,x))
+	i=i+3
+# Vector de posiciones en y
+y = [matriz1[2]]
+i = 5
+dy = np.matrix(y)
+while i < (len(matriz1))-3:
+	y = [[matriz1[i]]]
+	dy = np.concatenate((dy,y))
+	i=i+3
+#Matriz G
+G = matrizG(matriz1)
+#Regresion en x
+mx = regresion(G,dx)
+#Regresion en y
+my = regresion(G,dy)
+
+#g,v0x,v0y
+v0x = mx[1]
+v0y = my[1]
+g = my[2]
+
+print "g = ",g,"m/s2\n","v0x = ",v0x,"m/s\n","v0y = ",v0y,"m/s\n"
+
