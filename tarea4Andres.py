@@ -8,8 +8,16 @@
 # Importa la libreria numpay
 import numpy as np
 
+# Librerias para el manejo de archivos
+import os, sys
+
 # Constante
 numVarsRegresion = 3;
+
+# Identifica los archivos en la carpeta de trabajo
+def leerCarpeta(path):
+	dirs = os.listdir( path )
+	return dirs
 
 # Leer un archivo
 # @param: nombre del archivo
@@ -86,10 +94,23 @@ def calcularMatrizCovarianza(matrizDatos):
 	matrizCov = np.concatenate((matrizCov,o3))
 	return matrizCov
 
-matriz1 = leer("experimentID_0_theta_0.0.txt")
-a = np.matrix('1 2 3;4 5 6;7 8 9')
-v = np.matrix('3;2;3')
-regresion(a,v)
-print calcularCovarianza(v,v)
-print calcularMatrizCovarianza(a)
-print np.size(a)
+
+# Cuerpo principal del codigo
+	# Lee los archivos dentro de la carpeta dir
+ruta = "./hw4_data"
+archivos = leerCarpeta(ruta) # vector con el nombre de los archivos
+print archivos[0]
+numeroArchivos = len(archivos)
+
+	# Matriz de trabajo
+	# [gravedad, vox, voy, theta, ID]	
+matrizParam = np.zeros((numeroArchivos,5))
+
+	# Parametros de la regresion
+for ar in archivos:
+	elem = ar.split("_")
+	ID = elem[1]
+	finalstr = elem[3].split(".")
+	theta = '.'.join([finalstr[0],finalstr[1]])
+	print ID, theta
+
