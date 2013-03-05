@@ -65,9 +65,9 @@ def calcularCovarianza(vector1, vector2):
 #	de los valores iniciales de las velocidades iniciales". No se incluye theta en el analisis
 # @param: Matriz de datos: [gravedad, vox, voy]
 def calcularMatrizCovarianza(matrizDatos):
-	v1 = matrizDatos[0,:].copy()
-	v2 = matrizDatos[1,:].copy()
-	v3 = matrizDatos[2,:].copy()
+	v1 = matrizDatos[:,0].copy()
+	v2 = matrizDatos[:,1].copy()
+	v3 = matrizDatos[:,2].copy()
 	v1 = np.transpose(v1)
 	v2 = np.transpose(v2)
 	v3 = np.transpose(v3)
@@ -87,7 +87,7 @@ def calcularMatrizCovarianza(matrizDatos):
 	return matrizCov
 
 matriz1 = leer("experimentID_0_theta_0.0.txt")
-a = np.matrix('1 2;3 4; 5 6')
+a = np.matrix('1 2 3;4 5 6;7 8 9')
 v = np.matrix('3;2;3')
 regresion(a,v)
 print calcularCovarianza(v,v)
