@@ -11,8 +11,9 @@ import numpy as np
 # Librerias para el manejo de archivos
 import os, sys
 
-# Constante
+# Constantes
 numVarsRegresion = 3;
+ruta = "./hw4_data"
 
 # Identifica los archivos en la carpeta de trabajo
 def leerCarpeta(path):
@@ -23,7 +24,7 @@ def leerCarpeta(path):
 # @param: nombre del archivo
 # @return: matriz de los datos leidos
 def leer(nombreArchivo):
-	infile = open(nombreArchivo,'r')
+	infile = open(ruta + "/" + nombreArchivo,'r')
 	text = infile.readlines()
 	matrix = []
 	# Vector de recorrido
@@ -39,7 +40,15 @@ def leer(nombreArchivo):
 
 # Crea la matriz de la regresion G
 # @param: matriz leida en el archivo
-
+def matrizG(matrix):
+	m = [[1,matrix[0],0.5*matrix[0]*matrix[0]]]
+	i = 3
+	G = np.matrix(m)
+	while i < (len(matrix))-3:
+		m = [[1,matrix[i],0.5*matrix[i]*matrix[i]]]
+		G = np.concatenate((G,m))
+		i=i+3
+	return G
 
 # Hace la regresion
 # @param: matriz con los datos: [1, t, t^2/2]
@@ -97,14 +106,15 @@ def calcularMatrizCovarianza(matrizDatos):
 
 # Cuerpo principal del codigo
 	# Lee los archivos dentro de la carpeta dir
-ruta = "./hw4_data"
+
 archivos = leerCarpeta(ruta) # vector con el nombre de los archivos
 print archivos[0]
 numeroArchivos = len(archivos)
 
 	# Matriz de trabajo
-	# [gravedad, vox, voy, theta, ID]	
-matrizParam = np.zeros((numeroArchivos,5))
+	# [gravedad, vox, voy, theta, ID]
+matt = [[0,0,0,0,0]]	
+matrizParam = np.matrix(matt)
 
 	# Parametros de la regresion
 for ar in archivos:
@@ -112,5 +122,36 @@ for ar in archivos:
 	ID = elem[1]
 	finalstr = elem[3].split(".")
 	theta = '.'.join([finalstr[0],finalstr[1]])
-	print ID, theta
+	#Lee los datos
+	matriz1 = leer(ar)
+	# Vector de posiciones en x
+	x = [matriz1[1]]
+	i = 4
+	dx = np.matrix(x)
+	while i < (len(matriz1))-3:
+		x = [[matriz1[i]]]
+		dx = np.concatenate((dx,x))
+		i=i+3
+	# Vector de posiciones en y
+	y = [matriz1[2]]
+	i = 5
+	dy = np.matrix(y)
+	while i < (len(matriz1))-3:
+		y = [[matriz1[i]]]
+		dy = np.concatenate((dy,y))
+		i=i+3
+	#Matriz G
+	G = matrizG(matriz1)
+	#Regresion en x
+	mx = regresion(G,dx)
+	#Regresion en y
+	my = regresion(G,dy)
+	#g,v0x,v0y
+	v0x = mx[1]
+	v0y = my[1]
+	g = my[2]
+	salida = [[g.item(0,0),v0x.item(0,0),v0y.item(0,0),float(theta),float(ID)]]
+	matrizParam = np.concatenate((matrizParam,salida))
 
+matrizParam = np.delete(matrizParam,0,0)
+print matrizParam
