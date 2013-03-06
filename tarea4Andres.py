@@ -109,10 +109,9 @@ archivos = leerCarpeta(ruta) # vector con el nombre de los archivos
 print archivos[0]
 numeroArchivos = len(archivos)
 
-	# Matriz de trabajo
+	# Matriz de trabajo: matrizParam
 	# [gravedad, vox, voy, theta, ID]
-matt = [[0,0,0,0,0]]	
-matrizParam = np.matrix(matt)
+matrizParam = np.matrix([[0,0,0,0,0]])
 
 	# Parametros de la regresion
 for ar in archivos:
@@ -153,14 +152,18 @@ for ar in archivos:
 
 matrizParam = np.delete(matrizParam,0,0)
 
+	# Guarda los datos de la regresion
+np.savetxt("Regresion.txt",matrizParam,header = "# [g, vox, voy, theta, ID]")
 
 	# Calcula la matriz de covarianza de g, vox y voy
 matrizParam2 = matrizParam[:,0:3]
 matrizCov = calcularMatrizCovarianza(matrizParam2)
-print matrizCov	
+print matrizCov
+
+	# Vectores y valores propios de la matriz de covarianza
+valPropios, VecPropios = np.linalg.eig(matrizCov)
+print valPropios, VecPropios
 
 
-
-# Matriz de covarianza 
 
 
