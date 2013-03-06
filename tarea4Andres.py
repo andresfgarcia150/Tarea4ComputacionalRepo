@@ -106,7 +106,6 @@ def calcularMatrizCovarianza(matrizDatos):
 	# Lee los archivos dentro de la carpeta dir
 
 archivos = leerCarpeta(ruta) # vector con el nombre de los archivos
-print archivos[0]
 numeroArchivos = len(archivos)
 
 	# Matriz de trabajo: matrizParam
@@ -151,19 +150,45 @@ for ar in archivos:
 	matrizParam = np.concatenate((matrizParam,salida))
 
 matrizParam = np.delete(matrizParam,0,0)
+print matrizParam
+
+	# Organiza los datos por la columna theta
+matrizParam2 = np.sort(matrizParam.view('i8,i8,i8,i8,i8'), order=['f3','f4'], axis=0).view(np.double)
+print matrizParam2
 
 	# Guarda los datos de la regresion
-np.savetxt("Regresion.txt",matrizParam,header = "# [g, vox, voy, theta, ID]")
+np.savetxt("Regresion.txt",matrizParam2, fmt = "%10.5f") #header = "# [g, vox, voy, theta, ID]"
 
 	# Calcula la matriz de covarianza de g, vox y voy
-matrizParam2 = matrizParam[:,0:3]
-matrizCov = calcularMatrizCovarianza(matrizParam2)
+matrizParam3 = matrizParam2[:,0:3]
+matrizCov = calcularMatrizCovarianza(matrizParam3)
 print matrizCov
 
 	# Vectores y valores propios de la matriz de covarianza
-valPropios, VecPropios = np.linalg.eig(matrizCov)
-print valPropios, VecPropios
+valPropios, vecPropios = np.linalg.eig(matrizCov)
+print valPropios
+print vecPropios
 
+#np.savetxt("VectoresValoresPropios.txt",valPropios, vecPropios, fmt = "%10.5f") #header = "# [g, vox, voy, theta, ID]"
+#np.savetxt("VectoresValoresPropios.txt",vecPropios, fmt = "%10.5f") #header = "# [g, vox, voy, theta, ID]"
+
+	# Archivo con los vectores y valores propios
+nombreArchivoSalida = "VectoresValoresPropios.txt"
+archivoSalida = open(nombreArchivoSalida,'w')
+
+archivoSalida.write("Valores propios: \n")
+lineaTexto = '%10.5f %10.5f %10.5f' % (valPropios[0], valPropios[1], valPropios[2])
+archivoSalida.write(lineaTexto)
+archivoSalida.write("\n\nVectores propios: \n")
+lineaTexto = '%10.5f %10.5f %10.5f \n' % (vecPropios[0,0], vecPropios[1,0], vecPropios[2,0])
+archivoSalida.write(lineaTexto)
+lineaTexto = '%10.5f %10.5f %10.5f \n' % (vecPropios[0,1], vecPropios[1,1], vecPropios[2,1])
+archivoSalida.write(lineaTexto)
+lineaTexto = '%10.5f %10.5f %10.5f \n' % (vecPropios[0,2], vecPropios[1,2], vecPropios[2,2])
+archivoSalida.write(lineaTexto)
+
+#archivoSalida.write(lineaTexto)
+archivoSalida.close()
 
 
 
