@@ -11,6 +11,7 @@ import numpy as np
 # Librerias para el manejo de archivos
 import os, sys
 
+
 # Constantes
 numVarsRegresion = 3;
 ruta = "./hw4_data"
@@ -85,9 +86,6 @@ def calcularMatrizCovarianza(matrizDatos):
 	v1 = matrizDatos[:,0].copy()
 	v2 = matrizDatos[:,1].copy()
 	v3 = matrizDatos[:,2].copy()
-	v1 = np.transpose(v1)
-	v2 = np.transpose(v2)
-	v3 = np.transpose(v3)
 	o11 = calcularCovarianza(v1,v1)
 	o12 = calcularCovarianza(v1,v2)
 	o13 = calcularCovarianza(v1,v3)
@@ -154,4 +152,15 @@ for ar in archivos:
 	matrizParam = np.concatenate((matrizParam,salida))
 
 matrizParam = np.delete(matrizParam,0,0)
-print matrizParam
+
+
+	# Calcula la matriz de covarianza de g, vox y voy
+matrizParam2 = matrizParam[:,0:3]
+matrizCov = calcularMatrizCovarianza(matrizParam2)
+print matrizCov	
+
+
+
+# Matriz de covarianza 
+
+
