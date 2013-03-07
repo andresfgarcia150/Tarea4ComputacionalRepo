@@ -91,7 +91,6 @@ def calcularMatrizCovarianza(matrizDatos):
 	o23 = calcularCovarianza(v2,v3)
 	o33 = calcularCovarianza(v3,v3)
 	o1 = [[o11,o12,o13]]
-	print "o1", o1
 	o2 = [[o12,o22,o23]]
 	o3 = [[o13,o23,o33]]
 	matrizCov = np.matrix(o1)
@@ -148,42 +147,9 @@ for ar in archivos:
 	matrizParam = np.concatenate((matrizParam,salida))
 
 matrizParam = np.delete(matrizParam,0,0)
-print matrizParam
 
 	# Organiza los datos por la columna theta
 matrizParam2 = np.sort(matrizParam.view('i8,i8,i8,i8,i8'), order=['f3','f4'], axis=0).view(np.double)
-print matrizParam2
-
-	#Calcula los valores medios para la gravedad para cada angulo theta
-filas = matrizParam2.shape[0]
-suma = 0.0
-gmedia = np.matrix(np.sum(matrizParam2[0:6,0])/6)
-angulos = np.matrix(matrizParam2[0,3])
-i = 6
-while i <= filas-6:
-	suma = [[np.sum(matrizParam2[i:i+6,0])/6]]
-	gmedia = np.concatenate((gmedia,suma))
-	angle = [[matrizParam2[i,3]]]
-	angulos = np.concatenate((angulos,angle))
-	i=i+6
-#print angulos
-#print gmedia.shape
-	
-	# Grafica de gmedia - theta
-pylab.plot(angulos,gmedia,'.')
-pylab.xlabel('angulo polar (grados)')
-pylab.ylabel('gravedad media (m/s^2)')
-pylab.title('Gravedad media vs. Angulo polar')
-pylab.savefig('gmedia')
-pylab.grid(True)
-pylab.show()
-
-	#Calculo de las variaciones de la gravedad
-F = np.matrix(1.0 - (gmedia[0]/9.81))
-i = 1
-for i in range (filas/6):
-	calc = 1.0 - (gmedia[i]/9.81)
-	F = np.concatenate((F,calc))
 
 
 	# Guarda los datos de la regresion
@@ -192,15 +158,11 @@ np.savetxt("Regresion.txt",matrizParam2, fmt = "%10.5f") #header = "# [g, vox, v
 	# Calcula la matriz de covarianza de g, vox y voy
 matrizParam3 = matrizParam2[:,0:3]
 matrizCov = calcularMatrizCovarianza(matrizParam3)
-print matrizCov
+
 
 	# Vectores y valores propios de la matriz de covarianza
 valPropios, vecPropios = np.linalg.eig(matrizCov)
-print valPropios
-print vecPropios
 
-#np.savetxt("VectoresValoresPropios.txt",valPropios, vecPropios, fmt = "%10.5f") #header = "# [g, vox, voy, theta, ID]"
-#np.savetxt("VectoresValoresPropios.txt",vecPropios, fmt = "%10.5f") #header = "# [g, vox, voy, theta, ID]"
 
 	# Archivo con los vectores y valores propios
 nombreArchivoSalida = "VectoresValoresPropios.txt"
@@ -217,6 +179,80 @@ archivoSalida.write(lineaTexto)
 lineaTexto = '%10.5f %10.5f %10.5f \n' % (vecPropios[0,2], vecPropios[1,2], vecPropios[2,2])
 archivoSalida.write(lineaTexto)
 
-#archivoSalida.write(lineaTexto)
 archivoSalida.close()
 
+
+	#Calcula los valores medios para la gravedad para cada angulo theta
+filas = matrizParam2.shape[0]
+suma = 0.0
+gmedia = np.matrix(np.sum(matrizParam2[0:6,0])/6)
+angulos = np.matrix(matrizParam2[0,3])
+i = 6
+while i <= filas-6:
+	suma = [[np.sum(matrizParam2[i:i+6,0])/6]]
+	gmedia = np.concatenate((gmedia,suma))
+	angle = [[matrizParam2[i,3]]]
+	angulos = np.concatenate((angulos,angle))
+	i=i+6
+	
+	# Grafica de gmedia - theta
+pylab.plot(angulos,gmedia,'.')
+pylab.xlabel('angulo polar (grados)')
+pylab.ylabel('gravedad media (m/s^2)')
+pylab.title('Gravedad media vs. Angulo polar')
+pylab.savefig('gmedia')
+pylab.grid(True)
+
+	#Calculo de las variaciones de la gravedad
+F = np.matrix(1.0 - (gmedia[0]/9.81))
+i = 1
+for i in range ((filas/6)-1):
+	calc = 1.0 - (gmedia[i]/9.81)
+	F = np.concatenate((F,calc))
+
+	# Regresion seno
+sinTheta = np.sin(angulos)
+sinTheta = np.transpose(sinTheta)
+v1 = np.array(sinTheta[0,:])[0,:]
+f0,c0 = np.polyfit(v1,F,1)
+fest = np.matrix(v1*f0+c0)
+fest = np.transpose(fest)
+error = F - fest
+
+	# Grafica de salida
+import matplotlib.pyplot as plt
+from scipy.interpolate import interp1d
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.plot(angulos,F)
+ax.plot(angulos,fest)
+ax.legend(['Datos','Estimado'])
+ax.set_xlabel("$\\theta$",fontsize=20)
+ax.set_ylabel("$F(\\theta)$",fontsize=20)
+ax.set_title("$\mathrm{Funcion\ F\ real\ y\ estimada}$", fontsize=20)
+filename = 'GraficaAjuste'
+fig.savefig(filename + '.jpeg',format = 'jpeg', transparent=True)
+
+pylab.plot(angulos,F,'.')
+pylab.xlabel('angulo polar (grados)')
+pylab.ylabel('fluctuacion de la gravedad')
+pylab.title('Fluctuacion de la gravedad vs. Angulo polar')
+pylab.savefig('Fluctuacion')
+pylab.grid(True)
+
+fig2 = plt.figure()
+ax2 = fig2.add_subplot(111)
+ax2.bar(angulos,error)
+ax2.set_xlabel("$\\theta$",fontsize=20)
+ax2.set_ylabel("$E(\\theta)$",fontsize=20)
+ax2.set_title("$\mathrm{Error\ de\ F}$", fontsize=20)
+filename = 'GraficaResiduos'
+fig2.savefig(filename + '.jpeg',format = 'jpeg', transparent=True)
+
+pylab.plot(angulos,error,'.')
+pylab.xlabel('angulo polar (grados)')
+pylab.ylabel('error')
+pylab.title('Error vs. Angulo polar')
+pylab.savefig('Error')
+pylab.grid(True)
