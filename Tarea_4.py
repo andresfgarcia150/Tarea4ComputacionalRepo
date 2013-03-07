@@ -211,7 +211,10 @@ for i in range ((filas/6)-1):
 	F = np.concatenate((F,calc))
 
 	# Regresion seno
-sinTheta = np.sin(angulos)
+from numpy import pi
+sinTheta = np.sin(angulos*2*pi/360)
+print angulos
+print sinTheta
 sinTheta = np.transpose(sinTheta)
 v1 = np.array(sinTheta[0,:])[0,:]
 f0,c0 = np.polyfit(v1,F,1)
