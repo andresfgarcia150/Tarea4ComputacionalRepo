@@ -213,11 +213,11 @@ for i in range ((filas/6)-1):
 	# Regresion seno
 from numpy import pi
 sinTheta = np.sin(angulos*2*pi/360)
-print angulos
-print sinTheta
 sinTheta = np.transpose(sinTheta)
 v1 = np.array(sinTheta[0,:])[0,:]
 f0,c0 = np.polyfit(v1,F,1)
+print "f0\n", f0
+print "c0\n", c0
 fest = np.matrix(v1*f0+c0)
 fest = np.transpose(fest)
 error = F - fest
