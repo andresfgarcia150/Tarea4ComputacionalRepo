@@ -168,14 +168,14 @@ while i <= filas-6:
 	i=i+6
 #print angulos
 #print gmedia.shape
-
+	
+	# Grafica de gmedia - theta
 pylab.plot(angulos,gmedia,'.')
 pylab.xlabel('angulo polar (grados)')
 pylab.ylabel('gravedad media (m/s^2)')
 pylab.title('Gravedad media vs. Angulo polar')
 pylab.savefig('gmedia')
 pylab.grid(True)
-
 pylab.show()
 
 	#Calculo de las variaciones de la gravedad
